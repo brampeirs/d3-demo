@@ -13,12 +13,14 @@ import {
 } from '@angular/core';
 import { bisector, extent, max, min } from 'd3-array';
 import { axisBottom, axisLeft } from 'd3-axis';
+import { easeQuadOut } from 'd3-ease';
 import { format } from 'd3-format';
 import { scaleLinear, scaleTime, type ScaleLinear, type ScaleTime } from 'd3-scale';
 import { pointer, select, type Selection } from 'd3-selection';
 import { area, curveMonotoneX, line } from 'd3-shape';
 import { timeDay, timeHour, timeMonth, timeWeek, timeYear, type TimeInterval } from 'd3-time';
 import { timeFormat } from 'd3-time-format';
+import 'd3-transition';
 import { AreaChartDataPoint, AreaChartConfig, DEFAULT_CHART_CONFIG } from './area-chart.model';
 
 /** Minimum data points required to render a meaningful chart */
@@ -26,6 +28,9 @@ const MIN_DATA_POINTS = 2;
 
 /** Debounce delay for resize events in milliseconds */
 const RESIZE_DEBOUNCE_MS = 100;
+
+/** Animation duration in milliseconds */
+const ANIMATION_DURATION_MS = 750;
 
 /** Chart styling constants - can be moved to config if needed */
 const CHART_STYLES = {
@@ -96,18 +101,26 @@ export class AreaChartComponent {
   private resizeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private width = 0;
   private height = 0;
+  private isInitialRender = true;
+  private shouldAnimateDataChange = false;
+  private skipNextResize = false;
 
   constructor() {
     afterNextRender(() => {
-      this.initializeChart();
-      this.setupResizeObserver();
+      // Small delay to let the DOM fully settle before initial render
+      requestAnimationFrame(() => {
+        this.initializeChart();
+        this.skipNextResize = true; // Skip the first resize event that fires immediately
+        this.setupResizeObserver();
+      });
     });
 
-    // Track data changes and update chart
+    // Track data changes and update chart with animation
     effect(() => {
       // Read the data signal to establish dependency
       this.data();
       if (this.svg) {
+        this.shouldAnimateDataChange = true;
         this.updateChart();
       }
     });
@@ -174,6 +187,12 @@ export class AreaChartComponent {
 
   private handleResize(): void {
     if (!this.svg) return;
+
+    // Skip the first resize event that fires immediately after setup
+    if (this.skipNextResize) {
+      this.skipNextResize = false;
+      return;
+    }
 
     const container = this.chartContainer().nativeElement;
     const rect = container.getBoundingClientRect();
@@ -340,6 +359,23 @@ export class AreaChartComponent {
       .attr('stroke', CHART_STYLES.gridLineColor)
       .attr('stroke-width', 1);
 
+    // Create clip path for reveal animation
+    const clipId = `chart-clip-${Math.random().toString(36).substring(2, 11)}`;
+    const clipPath = defs.append('clipPath').attr('id', clipId);
+
+    const clipRect = clipPath.append('rect').attr('x', 0).attr('y', 0).attr('height', this.height);
+
+    // Set initial clip width based on whether we should animate
+    const shouldAnimate = this.isInitialRender || this.shouldAnimateDataChange;
+    if (shouldAnimate) {
+      clipRect.attr('width', 0);
+    } else {
+      clipRect.attr('width', this.width);
+    }
+
+    // Create group for chart paths that will be clipped
+    const chartPaths = g.append('g').attr('clip-path', `url(#${clipId})`);
+
     // Draw areas and lines for ALL series dynamically
     config.series.forEach((series, index) => {
       const areaGenerator = area<AreaChartDataPoint>()
@@ -348,7 +384,8 @@ export class AreaChartComponent {
         .y1((d) => yScale(getValue(d, series.key)))
         .curve(curveMonotoneX);
 
-      g.append('path')
+      chartPaths
+        .append('path')
         .datum(data)
         .attr('class', `area area-${index}`)
         .attr('fill', `url(#areaGradient${index})`)
@@ -359,7 +396,8 @@ export class AreaChartComponent {
         .y((d) => yScale(getValue(d, series.key)))
         .curve(curveMonotoneX);
 
-      g.append('path')
+      chartPaths
+        .append('path')
         .datum(data)
         .attr('class', `line line-${index}`)
         .attr('fill', 'none')
@@ -367,6 +405,18 @@ export class AreaChartComponent {
         .attr('stroke-width', 1.5)
         .attr('d', lineGenerator);
     });
+
+    // Animate the clip rect to reveal the chart
+    if (shouldAnimate) {
+      clipRect
+        .transition()
+        .duration(ANIMATION_DURATION_MS)
+        .ease(easeQuadOut)
+        .attr('width', this.width);
+
+      this.isInitialRender = false;
+      this.shouldAnimateDataChange = false;
+    }
 
     // Add axes with smart tick density based on available width
     const xAxis = this.createResponsiveXAxis(xScale, data);
