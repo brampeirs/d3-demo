@@ -499,6 +499,12 @@ export class AreaChartComponent {
       .attr('width', this.width)
       .attr('height', this.height);
 
+    const clearHoverState = () => {
+      hoverLine.style('opacity', 0);
+      hoverCircles.forEach((circle) => circle.style('opacity', 0));
+      this.hoveredData.set(null);
+    };
+
     overlay
       .on('pointerdown', (event: PointerEvent) => {
         overlay.node()?.setPointerCapture(event.pointerId);
@@ -531,11 +537,14 @@ export class AreaChartComponent {
       })
       .on('pointerup', (event: PointerEvent) => {
         overlay.node()?.releasePointerCapture(event.pointerId);
+        clearHoverState();
       })
-      .on('mouseleave', () => {
-        hoverLine.style('opacity', 0);
-        hoverCircles.forEach((circle) => circle.style('opacity', 0));
-        this.hoveredData.set(null);
+      .on('pointercancel', (event: PointerEvent) => {
+        overlay.node()?.releasePointerCapture(event.pointerId);
+        clearHoverState();
+      })
+      .on('pointerleave', () => {
+        clearHoverState();
       });
   }
 
