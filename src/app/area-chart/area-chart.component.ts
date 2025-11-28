@@ -567,9 +567,10 @@ export class AreaChartComponent {
       return result ?? fallback;
     };
 
-    // Define time intervals from smallest to largest
+    // Define time intervals from smallest to largest with increasing granularity
+    // Each entry specifies the max days threshold and expected number of ticks it would generate
     const intervals: Array<{
-      threshold: number; // max days for this interval
+      threshold: number; // max days for this interval to be considered
       interval: TimeInterval;
       format: string;
       ticksPerUnit: number; // approximate ticks this would generate
@@ -622,22 +623,41 @@ export class AreaChartComponent {
         format: '%b %Y',
         ticksPerUnit: months / 3,
       },
+      // Yearly intervals with different step sizes for multi-year ranges
       {
         threshold: Infinity,
         interval: safeInterval(() => timeYear.every(1), timeYear),
         format: '%Y',
         ticksPerUnit: years,
       },
+      {
+        threshold: Infinity,
+        interval: safeInterval(() => timeYear.every(2), timeYear),
+        format: '%Y',
+        ticksPerUnit: years / 2,
+      },
+      {
+        threshold: Infinity,
+        interval: safeInterval(() => timeYear.every(5), timeYear),
+        format: '%Y',
+        ticksPerUnit: years / 5,
+      },
+      {
+        threshold: Infinity,
+        interval: safeInterval(() => timeYear.every(10), timeYear),
+        format: '%Y',
+        ticksPerUnit: years / 10,
+      },
     ];
 
-    // Find the smallest interval that fits within maxTicks
+    // Find the first interval that fits within maxTicks
     for (const config of intervals) {
       if (days <= config.threshold && config.ticksPerUnit <= maxTicks) {
         return { interval: config.interval, format: config.format };
       }
     }
 
-    // Fallback: use the largest interval
+    // Fallback: use the last (most sparse) interval
     const fallback = intervals[intervals.length - 1];
     return { interval: fallback.interval, format: fallback.format };
   }
