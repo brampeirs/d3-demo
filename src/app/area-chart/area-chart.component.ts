@@ -81,7 +81,9 @@ export class AreaChartComponent {
   readonly tooltipDate = computed(() => {
     const dataPoint = this.hoveredData();
     if (!dataPoint) return '';
-    return timeFormat(this.config().dateFormat)(dataPoint.date);
+    const config = this.config();
+    const format = config.tooltipDateFormat ?? config.dateFormat;
+    return timeFormat(format)(dataPoint.date);
   });
 
   /** Gets the value for a specific series key from the hovered data point */

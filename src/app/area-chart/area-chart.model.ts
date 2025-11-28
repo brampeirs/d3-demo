@@ -29,6 +29,8 @@ export interface AreaChartConfig {
   series: SeriesConfig[];
   /** Date format for axis labels (e.g., '%b %d', '%Y') */
   dateFormat: string;
+  /** Optional: Date format for tooltip (defaults to dateFormat if not specified) */
+  tooltipDateFormat?: string;
   /** Whether to show the legend */
   showLegend: boolean;
   /** Chart margins */
