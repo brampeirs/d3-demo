@@ -16,7 +16,7 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { easeQuadOut } from 'd3-ease';
 import { format } from 'd3-format';
 import { scaleLinear, scaleTime, type ScaleLinear, type ScaleTime } from 'd3-scale';
-import { pointer, select, type Selection } from 'd3-selection';
+import { select, type Selection } from 'd3-selection';
 import { area, curveMonotoneX, line } from 'd3-shape';
 import { timeDay, timeHour, timeMonth, timeWeek, timeYear, type TimeInterval } from 'd3-time';
 import { timeFormat } from 'd3-time-format';
@@ -499,51 +499,75 @@ export class AreaChartComponent {
       .attr('width', this.width)
       .attr('height', this.height);
 
+    const hideTooltip = () => {
+      hoverLine.style('opacity', 0);
+      hoverCircles.forEach((circle) => circle.style('opacity', 0));
+      this.hoveredData.set(null);
+    };
+
+    // Helper to handle interaction at a given x position relative to chart
+    const handleInteraction = (clientX: number) => {
+      const containerRect = this.chartContainer().nativeElement.getBoundingClientRect();
+      const mouseX = clientX - containerRect.left - margin.left;
+      this.handleInteractionAtX(
+        mouseX,
+        xScale,
+        yScale,
+        data,
+        config,
+        seriesKeys,
+        getValue,
+        margin,
+        hoverLine,
+        hoverCircles
+      );
+    };
+
+    // Mouse events for desktop
     overlay
-      .on('pointerdown', (event: PointerEvent) => {
-        overlay.node()?.setPointerCapture(event.pointerId);
-        this.handlePointerMove(
-          event,
-          xScale,
-          yScale,
-          data,
-          config,
-          seriesKeys,
-          getValue,
-          margin,
-          hoverLine,
-          hoverCircles
-        );
+      .on('mouseenter mousemove', (event: MouseEvent) => {
+        handleInteraction(event.clientX);
       })
-      .on('pointermove', (event: PointerEvent) => {
-        this.handlePointerMove(
-          event,
-          xScale,
-          yScale,
-          data,
-          config,
-          seriesKeys,
-          getValue,
-          margin,
-          hoverLine,
-          hoverCircles
-        );
-      })
-      .on('pointerup', (event: PointerEvent) => {
-        overlay.node()?.releasePointerCapture(event.pointerId);
-      })
-      .on('mouseleave', () => {
-        hoverLine.style('opacity', 0);
-        hoverCircles.forEach((circle) => circle.style('opacity', 0));
-        this.hoveredData.set(null);
-      });
+      .on('mouseleave', hideTooltip);
+
+    // Touch events for mobile - these continue to fire during scroll
+    const overlayNode = overlay.node();
+    if (overlayNode) {
+      overlayNode.addEventListener(
+        'touchstart',
+        (event: TouchEvent) => {
+          if (event.touches.length > 0) {
+            handleInteraction(event.touches[0].clientX);
+          }
+        },
+        { passive: true }
+      );
+
+      overlayNode.addEventListener(
+        'touchmove',
+        (event: TouchEvent) => {
+          if (event.touches.length > 0) {
+            handleInteraction(event.touches[0].clientX);
+          }
+        },
+        { passive: true }
+      );
+
+      overlayNode.addEventListener(
+        'touchend',
+        () => {
+          hideTooltip();
+        },
+        { passive: true }
+      );
+    }
   }
 
   /**
-   * Handles pointer move events for tooltip and hover effects.
+   * Handles interaction at a given x position for tooltip and hover effects.
    */
-  private handlePointerMove(
-    event: PointerEvent,
+  private handleInteractionAtX(
+    mouseX: number,
     xScale: ScaleTime<number, number>,
     yScale: ScaleLinear<number, number>,
     data: AreaChartDataPoint[],
@@ -554,9 +578,11 @@ export class AreaChartComponent {
     hoverLine: Selection<SVGLineElement, unknown, null, undefined>,
     hoverCircles: Selection<SVGCircleElement, unknown, null, undefined>[]
   ): void {
-    const [mouseX] = pointer(event);
+    // Clamp mouseX to chart bounds
+    const clampedX = Math.max(0, Math.min(mouseX, this.width));
+
     const dateBisector = bisector<AreaChartDataPoint, Date>((d) => d.date).left;
-    const x0 = xScale.invert(mouseX);
+    const x0 = xScale.invert(clampedX);
     const i = dateBisector(data, x0, 1);
     const d0 = data[i - 1];
     const d1 = data[i];
