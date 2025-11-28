@@ -1,0 +1,44 @@
+<div class="area-chart-wrapper">
+  <!-- Chart Container -->
+  <div
+    #chartContainer
+    class="chart-container"
+    role="figure"
+    aria-label="Interactive area chart showing time series data"
+  ></div>
+
+  <!-- Tooltip -->
+  @if (tooltipVisible()) {
+  <div
+    class="tooltip"
+    [class.tooltip-left]="tooltipOnLeft()"
+    role="tooltip"
+    aria-live="polite"
+    [style.left.px]="tooltipPosition().x"
+    [style.top.px]="tooltipPosition().y"
+  >
+    <div class="tooltip-header">{{ tooltipDate() }}</div>
+    <div class="tooltip-content">
+      @for (series of config().series; track series.key) {
+      <div class="tooltip-row">
+        <span class="tooltip-dot" [style.background-color]="series.color"></span>
+        <span class="tooltip-label">{{ series.name }}</span>
+        <span class="tooltip-value">{{ getSeriesValue(series.key) }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Legend -->
+  @if (config().showLegend) {
+  <div class="legend" role="list" aria-label="Chart legend">
+    @for (series of config().series; track series.key) {
+    <div class="legend-item" role="listitem">
+      <span class="legend-dot" [style.background-color]="series.color"></span>
+      <span class="legend-label">{{ series.name }}</span>
+    </div>
+    }
+  </div>
+  }
+</div>
