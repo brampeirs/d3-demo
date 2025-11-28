@@ -4,11 +4,15 @@
     #chartContainer
     class="chart-container"
     role="figure"
-    aria-label="Interactive area chart showing time series data"
+    [attr.aria-label]="
+      hasValidData()
+        ? 'Interactive area chart showing time series data'
+        : 'Area chart with no data available'
+    "
   ></div>
 
-  <!-- Tooltip -->
-  @if (tooltipVisible()) {
+  <!-- Tooltip (only shown when we have valid data and are hovering) -->
+  @if (hasValidData() && tooltipVisible()) {
   <div
     class="tooltip"
     [class.tooltip-left]="tooltipOnLeft()"
@@ -30,8 +34,8 @@
   </div>
   }
 
-  <!-- Legend -->
-  @if (config().showLegend) {
+  <!-- Legend (only shown when we have valid data) -->
+  @if (hasValidData() && config().showLegend) {
   <div class="legend" role="list" aria-label="Chart legend">
     @for (series of config().series; track series.key) {
     <div class="legend-item" role="listitem">
