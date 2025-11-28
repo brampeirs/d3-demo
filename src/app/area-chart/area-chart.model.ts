@@ -48,3 +48,26 @@ export const DEFAULT_CHART_CONFIG: AreaChartConfig = {
   showLegend: true,
   margin: { top: 20, right: 30, bottom: 40, left: 50 },
 };
+
+/**
+ * Time range options for the range picker.
+ */
+export type TimeRange = 'ALL' | '2Y' | '1Y' | 'YTD';
+
+/**
+ * Configuration for a time range button.
+ */
+export interface TimeRangeOption {
+  value: TimeRange;
+  label: string;
+}
+
+/**
+ * Default time range options.
+ */
+export const TIME_RANGE_OPTIONS: TimeRangeOption[] = [
+  { value: 'ALL', label: 'All' },
+  { value: '2Y', label: '2Y' },
+  { value: '1Y', label: '1Y' },
+  { value: 'YTD', label: 'YTD' },
+];
