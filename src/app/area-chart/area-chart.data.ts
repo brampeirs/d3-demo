@@ -52,80 +52,39 @@ export const SAMPLE_SINGLE_SERIES_DATA: AreaChartDataPoint[] = generateDailyData
 );
 
 /**
- * Net worth data - total EUR over time.
- * Real monthly financial data sorted chronologically.
+ * Generate realistic net worth data with growth trend and some volatility.
  */
-export const NET_WORTH_DATA: AreaChartDataPoint[] = [
-  // { date: new Date('2019-01-01'), totalEur: 0 },
-  { date: new Date('2020-01-01'), totalEur: 147995.14 },
-  { date: new Date('2020-02-01'), totalEur: 147995.14 },
-  { date: new Date('2020-03-01'), totalEur: 147995.14 },
-  { date: new Date('2020-04-01'), totalEur: 147995.14 },
-  { date: new Date('2020-05-01'), totalEur: 147995.14 },
-  { date: new Date('2020-06-01'), totalEur: 147995.14 },
-  { date: new Date('2020-07-01'), totalEur: 159866.44 },
-  { date: new Date('2020-08-01'), totalEur: 159866.44 },
-  { date: new Date('2020-09-01'), totalEur: 159866.44 },
-  { date: new Date('2020-10-01'), totalEur: 159866.44 },
-  { date: new Date('2020-11-01'), totalEur: 160213.74 },
-  { date: new Date('2020-12-01'), totalEur: 163067.11 },
-  { date: new Date('2021-01-01'), totalEur: 168258.77 },
-  { date: new Date('2021-02-01'), totalEur: 168258.77 },
-  { date: new Date('2021-03-01'), totalEur: 170113.32 },
-  { date: new Date('2021-04-01'), totalEur: 170113.32 },
-  { date: new Date('2021-05-01'), totalEur: 170113.32 },
-  { date: new Date('2021-06-01'), totalEur: 170113.32 },
-  { date: new Date('2021-07-01'), totalEur: 179046.58 },
-  { date: new Date('2021-08-01'), totalEur: 179046.58 },
-  { date: new Date('2021-09-01'), totalEur: 179046.58 },
-  { date: new Date('2021-10-01'), totalEur: 179046.58 },
-  { date: new Date('2021-11-01'), totalEur: 203382.99 },
-  { date: new Date('2021-12-01'), totalEur: 204706.43 },
-  { date: new Date('2022-01-01'), totalEur: 207366.6 },
-  { date: new Date('2022-02-01'), totalEur: 207366.6 },
-  { date: new Date('2022-03-01'), totalEur: 207366.6 },
-  { date: new Date('2022-04-01'), totalEur: 210438.85 },
-  { date: new Date('2022-05-01'), totalEur: 210438.85 },
-  { date: new Date('2022-06-01'), totalEur: 209507.19 },
-  { date: new Date('2022-07-01'), totalEur: 258834.08 },
-  { date: new Date('2022-08-01'), totalEur: 258834.08 },
-  { date: new Date('2022-09-01'), totalEur: 261174.41 },
-  { date: new Date('2022-10-01'), totalEur: 261174.41 },
-  { date: new Date('2022-11-01'), totalEur: 261174.41 },
-  { date: new Date('2022-12-01'), totalEur: 275267.01 },
-  { date: new Date('2023-01-01'), totalEur: 279346.82 },
-  { date: new Date('2023-02-01'), totalEur: 279346.82 },
-  { date: new Date('2023-03-01'), totalEur: 289070.1 },
-  { date: new Date('2023-04-01'), totalEur: 292319.66 },
-  { date: new Date('2023-05-01'), totalEur: 294264.5 },
-  { date: new Date('2023-06-01'), totalEur: 294264.5 },
-  { date: new Date('2023-07-01'), totalEur: 298117.05 },
-  { date: new Date('2023-08-01'), totalEur: 298117.05 },
-  { date: new Date('2023-09-01'), totalEur: 298117.05 },
-  { date: new Date('2023-10-01'), totalEur: 299464.15 },
-  { date: new Date('2023-11-01'), totalEur: 307642.86 },
-  { date: new Date('2023-12-01'), totalEur: 307642.86 },
-  { date: new Date('2024-01-01'), totalEur: 317707.25 },
-  { date: new Date('2024-02-01'), totalEur: 320223.94 },
-  { date: new Date('2024-03-01'), totalEur: 323655.09 },
-  { date: new Date('2024-04-01'), totalEur: 323655.09 },
-  { date: new Date('2024-05-01'), totalEur: 326702.94 },
-  { date: new Date('2024-06-01'), totalEur: 328703.33 },
-  { date: new Date('2024-07-01'), totalEur: 328703.33 },
-  { date: new Date('2024-08-01'), totalEur: 325555.52 },
-  { date: new Date('2024-09-01'), totalEur: 328529.6 },
-  { date: new Date('2024-10-01'), totalEur: 328529.6 },
-  { date: new Date('2024-11-01'), totalEur: 328529.6 },
-  { date: new Date('2024-12-01'), totalEur: 335856.6 },
-  { date: new Date('2025-01-01'), totalEur: 335856.6 },
-  { date: new Date('2025-02-01'), totalEur: 335856.6 },
-  { date: new Date('2025-03-01'), totalEur: 335856.6 },
-  { date: new Date('2025-04-01'), totalEur: 335856.6 },
-  { date: new Date('2025-05-01'), totalEur: 335856.6 },
-  { date: new Date('2025-06-01'), totalEur: 297340.31 },
-  { date: new Date('2025-07-01'), totalEur: 297340.31 },
-  { date: new Date('2025-08-01'), totalEur: 297340.31 },
-  { date: new Date('2025-09-01'), totalEur: 303752.6 },
-  { date: new Date('2025-10-01'), totalEur: 303752.6 },
-  { date: new Date('2025-11-01'), totalEur: 305184.91 },
-];
+function generateNetWorthData(): AreaChartDataPoint[] {
+  const data: AreaChartDataPoint[] = [];
+  let currentValue = 50000 + Math.random() * 30000; // Start between 50k-80k
+
+  const startYear = 2020;
+  const endYear = 2025;
+
+  for (let year = startYear; year <= endYear; year++) {
+    const monthsInYear = year === endYear ? 11 : 12; // Current year up to November
+    for (let month = 1; month <= monthsInYear; month++) {
+      // Add some monthly growth (average ~2-4% annually with variance)
+      const monthlyGrowth = 1 + (0.002 + Math.random() * 0.008);
+      // Occasional market dips
+      const marketFactor = Math.random() > 0.15 ? 1 : 0.97 + Math.random() * 0.02;
+      // Savings contributions (random between 500-2500)
+      const savings = 500 + Math.random() * 2000;
+
+      currentValue = currentValue * monthlyGrowth * marketFactor + savings;
+
+      data.push({
+        date: new Date(year, month - 1, 1),
+        totalEur: Math.round(currentValue * 100) / 100,
+      });
+    }
+  }
+
+  return data;
+}
+
+/**
+ * Net worth data - total EUR over time.
+ * Simulated monthly financial data with realistic growth patterns.
+ */
+export const NET_WORTH_DATA: AreaChartDataPoint[] = generateNetWorthData();
