@@ -505,8 +505,17 @@ export class AreaChartComponent {
       this.hoveredData.set(null);
     };
 
+    let pointerLeaveTimeout: ReturnType<typeof setTimeout> | null = null;
+    const clearPointerLeaveTimeout = () => {
+      if (pointerLeaveTimeout) {
+        clearTimeout(pointerLeaveTimeout);
+        pointerLeaveTimeout = null;
+      }
+    };
+
     overlay
       .on('pointerdown', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
         overlay.node()?.setPointerCapture(event.pointerId);
         this.handlePointerMove(
           event,
@@ -522,6 +531,7 @@ export class AreaChartComponent {
         );
       })
       .on('pointermove', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
         this.handlePointerMove(
           event,
           xScale,
@@ -536,14 +546,26 @@ export class AreaChartComponent {
         );
       })
       .on('pointerup', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
         overlay.node()?.releasePointerCapture(event.pointerId);
         clearHoverState();
       })
       .on('pointercancel', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
         overlay.node()?.releasePointerCapture(event.pointerId);
         clearHoverState();
       })
-      .on('pointerleave', () => {
+      .on('pointerleave', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
+
+        if (event.buttons !== 0) {
+          pointerLeaveTimeout = setTimeout(() => {
+            clearHoverState();
+            pointerLeaveTimeout = null;
+          }, 50);
+          return;
+        }
+
         clearHoverState();
       });
   }
