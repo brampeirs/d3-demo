@@ -499,8 +499,26 @@ export class AreaChartComponent {
       .attr('width', this.width)
       .attr('height', this.height);
 
+    const clearHoverState = () => {
+      hoverLine.style('opacity', 0);
+      hoverCircles.forEach((circle) => circle.style('opacity', 0));
+      this.hoveredData.set(null);
+    };
+
+    let pointerLeaveTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isPointerActive = false;
+
+    const clearPointerLeaveTimeout = () => {
+      if (pointerLeaveTimeout) {
+        clearTimeout(pointerLeaveTimeout);
+        pointerLeaveTimeout = null;
+      }
+    };
+
     overlay
       .on('pointerdown', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
+        isPointerActive = true;
         overlay.node()?.setPointerCapture(event.pointerId);
         this.handlePointerMove(
           event,
@@ -516,6 +534,7 @@ export class AreaChartComponent {
         );
       })
       .on('pointermove', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
         this.handlePointerMove(
           event,
           xScale,
@@ -530,12 +549,26 @@ export class AreaChartComponent {
         );
       })
       .on('pointerup', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
+        isPointerActive = false;
         overlay.node()?.releasePointerCapture(event.pointerId);
+        clearHoverState();
       })
-      .on('mouseleave', () => {
-        hoverLine.style('opacity', 0);
-        hoverCircles.forEach((circle) => circle.style('opacity', 0));
-        this.hoveredData.set(null);
+      .on('pointercancel', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
+        isPointerActive = false;
+        overlay.node()?.releasePointerCapture(event.pointerId);
+        clearHoverState();
+      })
+      .on('pointerleave', (event: PointerEvent) => {
+        clearPointerLeaveTimeout();
+
+        if (isPointerActive || event.buttons !== 0) {
+          // Ignore leave events triggered while the gesture is still active (e.g. page scroll on touch)
+          return;
+        }
+
+        clearHoverState();
       });
   }
 
