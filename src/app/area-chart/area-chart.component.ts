@@ -506,6 +506,8 @@ export class AreaChartComponent {
     };
 
     let pointerLeaveTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isPointerActive = false;
+
     const clearPointerLeaveTimeout = () => {
       if (pointerLeaveTimeout) {
         clearTimeout(pointerLeaveTimeout);
@@ -516,6 +518,7 @@ export class AreaChartComponent {
     overlay
       .on('pointerdown', (event: PointerEvent) => {
         clearPointerLeaveTimeout();
+        isPointerActive = true;
         overlay.node()?.setPointerCapture(event.pointerId);
         this.handlePointerMove(
           event,
@@ -547,22 +550,21 @@ export class AreaChartComponent {
       })
       .on('pointerup', (event: PointerEvent) => {
         clearPointerLeaveTimeout();
+        isPointerActive = false;
         overlay.node()?.releasePointerCapture(event.pointerId);
         clearHoverState();
       })
       .on('pointercancel', (event: PointerEvent) => {
         clearPointerLeaveTimeout();
+        isPointerActive = false;
         overlay.node()?.releasePointerCapture(event.pointerId);
         clearHoverState();
       })
       .on('pointerleave', (event: PointerEvent) => {
         clearPointerLeaveTimeout();
 
-        if (event.buttons !== 0) {
-          pointerLeaveTimeout = setTimeout(() => {
-            clearHoverState();
-            pointerLeaveTimeout = null;
-          }, 50);
+        if (isPointerActive || event.buttons !== 0) {
+          // Ignore leave events triggered while the gesture is still active (e.g. page scroll on touch)
           return;
         }
 
