@@ -491,14 +491,18 @@ export class AreaChartComponent {
       hoverCircles.push(circle);
     });
 
-    // Add invisible overlay for mouse events
-    g.append('rect')
+    // Add invisible overlay for pointer events (supports mouse and touch)
+    const overlay = g
+      .append('rect')
       .attr('class', 'overlay')
       .attr('fill', 'transparent')
       .attr('width', this.width)
-      .attr('height', this.height)
-      .on('mousemove', (event: MouseEvent) => {
-        this.handleMouseMove(
+      .attr('height', this.height);
+
+    overlay
+      .on('pointerdown', (event: PointerEvent) => {
+        overlay.node()?.setPointerCapture(event.pointerId);
+        this.handlePointerMove(
           event,
           xScale,
           yScale,
@@ -511,6 +515,23 @@ export class AreaChartComponent {
           hoverCircles
         );
       })
+      .on('pointermove', (event: PointerEvent) => {
+        this.handlePointerMove(
+          event,
+          xScale,
+          yScale,
+          data,
+          config,
+          seriesKeys,
+          getValue,
+          margin,
+          hoverLine,
+          hoverCircles
+        );
+      })
+      .on('pointerup', (event: PointerEvent) => {
+        overlay.node()?.releasePointerCapture(event.pointerId);
+      })
       .on('mouseleave', () => {
         hoverLine.style('opacity', 0);
         hoverCircles.forEach((circle) => circle.style('opacity', 0));
@@ -519,10 +540,10 @@ export class AreaChartComponent {
   }
 
   /**
-   * Handles mouse move events for tooltip and hover effects.
+   * Handles pointer move events for tooltip and hover effects.
    */
-  private handleMouseMove(
-    event: MouseEvent,
+  private handlePointerMove(
+    event: PointerEvent,
     xScale: ScaleTime<number, number>,
     yScale: ScaleLinear<number, number>,
     data: AreaChartDataPoint[],
