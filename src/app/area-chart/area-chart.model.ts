@@ -39,6 +39,10 @@ export interface AreaChartConfig {
   yAxisFormat?: (value: number) => string;
   /** Auto-calculate Y-axis minimum based on data range (default: false, starts at 0) */
   autoMinY?: boolean;
+  /** Whether to show the vertical crosshair on hover (default: true) */
+  showCrosshair?: boolean;
+  /** Whether to animate the tooltip following the cursor (default: false) */
+  tooltipAnimation?: boolean;
 }
 
 /**
@@ -49,6 +53,8 @@ export const DEFAULT_CHART_CONFIG: AreaChartConfig = {
   dateFormat: '%b %d',
   showLegend: true,
   margin: { top: 20, right: 30, bottom: 40, left: 50 },
+  showCrosshair: true,
+  tooltipAnimation: true,
 };
 
 /**

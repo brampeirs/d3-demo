@@ -53,8 +53,14 @@ export class AreaChartComponent {
   /** Input data for the chart - requires at least a 'date' field and any number of numeric series */
   readonly data = input.required<AreaChartDataPoint[]>();
 
-  /** Chart configuration */
-  readonly config = input<AreaChartConfig>(DEFAULT_CHART_CONFIG);
+  /** Chart configuration input */
+  readonly configInput = input<Partial<AreaChartConfig>>({}, { alias: 'config' });
+
+  /** Merged chart configuration with defaults */
+  readonly config = computed(() => ({
+    ...DEFAULT_CHART_CONFIG,
+    ...this.configInput(),
+  }));
 
   /** Reference to the chart container element */
   readonly chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
@@ -641,7 +647,12 @@ export class AreaChartComponent {
     const xPos = xScale(d.date);
     const containerRect = this.chartContainer().nativeElement.getBoundingClientRect();
 
-    hoverLine.attr('x1', xPos).attr('x2', xPos).style('opacity', 1);
+    // Show crosshair if enabled (default: true)
+    const showCrosshair = config.showCrosshair ?? true;
+    hoverLine
+      .attr('x1', xPos)
+      .attr('x2', xPos)
+      .style('opacity', showCrosshair ? 1 : 0);
 
     // Position hover circles for ALL series
     config.series.forEach((series, index) => {
@@ -654,9 +665,13 @@ export class AreaChartComponent {
     // Find the minimum Y position (highest point on screen) for tooltip
     const minY = Math.min(...seriesKeys.map((key) => yScale(getValue(d, key))));
 
-    // Determine if tooltip should flip to the left (when cursor is past midpoint)
-    const chartMidpoint = this.width / 2;
-    this.tooltipOnLeft.set(xPos > chartMidpoint);
+    const tooltipX = xPos + margin.left + containerRect.left;
+
+    // Flip tooltip to left when it would overflow the chart's right edge
+    // Estimate tooltip width (~200px) + offset (16px)
+    const estimatedTooltipWidth = 216;
+    const chartRightEdge = containerRect.right;
+    this.tooltipOnLeft.set(tooltipX + estimatedTooltipWidth > chartRightEdge);
 
     // Cache chart-relative positions for scroll updates
     this.lastXPos = xPos;
@@ -664,7 +679,7 @@ export class AreaChartComponent {
     this.lastMargin = margin;
 
     this.tooltipPosition.set({
-      x: xPos + margin.left + containerRect.left,
+      x: tooltipX,
       y: minY + margin.top + containerRect.top,
     });
   }

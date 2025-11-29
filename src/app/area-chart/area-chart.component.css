@@ -40,6 +40,11 @@
   font-size: 14px;
 }
 
+/* Subtle delayed follow animation like shadcn/ui */
+.tooltip.tooltip-animated {
+  transition: left 400ms ease-out, top 400ms ease-out;
+}
+
 /* When cursor is on the right side, flip tooltip to the left */
 .tooltip.tooltip-left {
   transform: translateX(-100%) translateX(-16px) translateY(-50%);

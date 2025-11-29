@@ -19,6 +19,7 @@
     aria-live="polite"
     [style.left.px]="tooltipPosition().x"
     [style.top.px]="tooltipPosition().y"
+    [class.tooltip-animated]="config().tooltipAnimation"
   >
     <div class="tooltip-header">{{ tooltipDate() }}</div>
     <div class="tooltip-content">
