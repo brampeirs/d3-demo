@@ -101,11 +101,16 @@ export class AreaChartComponent {
   private svg: Selection<SVGSVGElement, unknown, null, undefined> | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private resizeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private scrollHandler: (() => void) | null = null;
   private width = 0;
   private height = 0;
   private isInitialRender = true;
   private shouldAnimateDataChange = false;
   private skipNextResize = false;
+  /** Cached chart position for tooltip - updated on scroll */
+  private lastXPos = 0;
+  private lastMinY = 0;
+  private lastMargin: AreaChartConfig['margin'] | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -114,6 +119,7 @@ export class AreaChartComponent {
         this.initializeChart();
         this.skipNextResize = true; // Skip the first resize event that fires immediately
         this.setupResizeObserver();
+        this.setupScrollListener();
       });
     });
 
@@ -145,6 +151,11 @@ export class AreaChartComponent {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
+    }
+
+    if (this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler, true);
+      this.scrollHandler = null;
     }
 
     if (this.svg) {
@@ -185,6 +196,35 @@ export class AreaChartComponent {
     });
 
     this.resizeObserver.observe(this.chartContainer().nativeElement);
+  }
+
+  /**
+   * Sets up scroll listener to update tooltip position during scroll.
+   */
+  private setupScrollListener(): void {
+    this.scrollHandler = () => {
+      // Only update if tooltip is visible
+      if (this.hoveredData() && this.lastMargin) {
+        this.updateTooltipPosition();
+      }
+    };
+
+    // Use capture phase to catch scroll events on any scrollable ancestor
+    window.addEventListener('scroll', this.scrollHandler, true);
+  }
+
+  /**
+   * Updates the tooltip position based on current container position.
+   * Uses cached chart-relative coordinates.
+   */
+  private updateTooltipPosition(): void {
+    if (!this.lastMargin) return;
+
+    const containerRect = this.chartContainer().nativeElement.getBoundingClientRect();
+    this.tooltipPosition.set({
+      x: this.lastXPos + this.lastMargin.left + containerRect.left,
+      y: this.lastMinY + this.lastMargin.top + containerRect.top,
+    });
   }
 
   private handleResize(): void {
@@ -617,6 +657,11 @@ export class AreaChartComponent {
     // Determine if tooltip should flip to the left (when cursor is past midpoint)
     const chartMidpoint = this.width / 2;
     this.tooltipOnLeft.set(xPos > chartMidpoint);
+
+    // Cache chart-relative positions for scroll updates
+    this.lastXPos = xPos;
+    this.lastMinY = minY;
+    this.lastMargin = margin;
 
     this.tooltipPosition.set({
       x: xPos + margin.left + containerRect.left,
