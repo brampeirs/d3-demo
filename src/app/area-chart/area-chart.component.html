@@ -13,6 +13,7 @@
   <!-- Tooltip (only shown when we have valid data and are hovering) -->
   @if (hasValidData() && tooltipVisible()) {
   <div
+    #tooltip
     class="tooltip"
     [class.tooltip-left]="tooltipOnLeft()"
     role="tooltip"

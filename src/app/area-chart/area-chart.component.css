@@ -42,7 +42,7 @@
 
 /* Subtle delayed follow animation like shadcn/ui */
 .tooltip.tooltip-animated {
-  transition: left 400ms ease-out, top 400ms ease-out;
+  transition: left 400ms ease-in-out, top 400ms ease-in-out;
 }
 
 /* When cursor is on the right side, flip tooltip to the left */

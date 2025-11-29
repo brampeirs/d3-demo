@@ -65,6 +65,9 @@ export class AreaChartComponent {
   /** Reference to the chart container element */
   readonly chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
 
+  /** Reference to the tooltip element */
+  readonly tooltipElement = viewChild<ElementRef<HTMLDivElement>>('tooltip');
+
   /** Current hovered data point for tooltip */
   readonly hoveredData = signal<AreaChartDataPoint | null>(null);
 
@@ -668,10 +671,11 @@ export class AreaChartComponent {
     const tooltipX = xPos + margin.left + containerRect.left;
 
     // Flip tooltip to left when it would overflow the chart's right edge
-    // Estimate tooltip width (~200px) + offset (16px)
-    const estimatedTooltipWidth = 216;
+    // Use actual tooltip width if available, otherwise fallback to estimate
+    const tooltipOffset = 16;
+    const tooltipWidth = this.tooltipElement()?.nativeElement.offsetWidth ?? 200;
     const chartRightEdge = containerRect.right;
-    this.tooltipOnLeft.set(tooltipX + estimatedTooltipWidth > chartRightEdge);
+    this.tooltipOnLeft.set(tooltipX + tooltipOffset + tooltipWidth > chartRightEdge);
 
     // Cache chart-relative positions for scroll updates
     this.lastXPos = xPos;
