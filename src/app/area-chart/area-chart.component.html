@@ -26,7 +26,7 @@
     <div class="tooltip-content">
       @for (series of config().series; track series.key) {
       <div class="tooltip-row">
-        <span class="tooltip-dot" [style.background-color]="series.color"></span>
+        <span class="tooltip-indicator" [style.background-color]="series.color"></span>
         <span class="tooltip-label">{{ series.name }}</span>
         <span class="tooltip-value">{{ getSeriesValue(series.key) }}</span>
       </div>
@@ -40,7 +40,7 @@
   <div class="legend" role="list" aria-label="Chart legend">
     @for (series of config().series; track series.key) {
     <div class="legend-item" role="listitem">
-      <span class="legend-dot" [style.background-color]="series.color"></span>
+      <span class="legend-indicator" [style.background-color]="series.color"></span>
       <span class="legend-label">{{ series.name }}</span>
     </div>
     }
